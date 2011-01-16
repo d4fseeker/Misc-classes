@@ -60,8 +60,8 @@ class socketserver {
 	
 	/**
 	Prepare a new socket for creation.
-	@param type 'TCP' or 'UNIX'
-	@param path [String] If type=TCP: 'IP:PORT', type=UNIX: '/path/to/my.socket'
+	@param type {TCP|UNIX}
+	@param path [String] If type=TCP: '<IP4|IP6>:IP:PORT', type=UNIX: '/path/to/my.socket'
 	@return [bool] Success status
 	*/
 	public function socketRegister($type,$path) {
@@ -81,6 +81,9 @@ class socketserver {
 	
 	/**
 	Checks if a socket is already used by another process
+	@param type {TCP|UNIX}
+	@param path [String] If type=TCP: '<IP4|IP6>:IP:PORT', type=UNIX: '/path/to/my.socket'
+	@return [bool] true if exists, false if it does not or the file is unreadable
 	*/
 	public function socketExists($type,$path) {
 		$FILE = SOK_PID_FOLDER.md5($type.",".$path).".pid";
@@ -123,9 +126,34 @@ class socketserver {
 	@return [bool] success/failure
 	*/
 	protected function socketCreateTCP($master_id) {
-		$sock = socket_create(AF_INET, SOCK_STREAM, 0); 
+		$info = explode(":",$this->masters[$master_id]['path']);
+		$sock = socket_create( (($info[0]=='IP4')?AF_INET:AF_INET6) , SOCK_STREAM, SOL_TCP);
+		if(!@socket_bind($sock, $info[1], $info[2])) {
+			throw new SOKexception('Could not bind to TCP-Socket: '.$this->masters[$master_id]['path']);
+			if(SOK_TRIGGER) trigger_error('Could not bind to TCP-Socket: '.$this->masters[$master_id]['path']);
+			return false;
+		}
+		socket_listen($sock);
+		$this->masters[$master_id]['socket'] = $sock;
+		return true;
 	}
 	
+	/**
+	Attempt to create a registered UNIX-socket. No validation
+	@param master_id ID of the master socket to create
+	@return [bool] success/failure
+	*/
+	protected function socketCreateUNIX($master_id) {
+		$sock = socket_create( AF_UNIX , SOCK_STREAM, SOL_TCP);
+		if(!@socket_bind($sock, $this->masters[$master_id]['path'])) {
+			throw new SOKexception('Could not bind to UNIX-Socket: '.$this->masters[$master_id]['path']);
+			if(SOK_TRIGGER) trigger_error('Could not bind to UNIX-Socket: '.$this->masters[$master_id]['path']);
+			return false;
+		}
+		socket_listen($sock);
+		$this->masters[$master_id]['socket'] = $sock;
+		return true;
+	}
 	
 }
 ?>
