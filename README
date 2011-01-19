@@ -40,6 +40,6 @@ Methods for remote database access
 		
 Security
 	suid
-		If the user the script runs under is privileged (root) and the request does not require such privileges,
-		the system switches user to a non-provileged account marked in the request or -if none provided- a 
-		fallback account specified in the config file.
+		If the user the script runs under is privileged (root) and the request does not require such 
+		privileges,	the system switches user to a non-provileged account marked in the request or
+		-if none provided- a fallback account specified in the config file.
