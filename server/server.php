@@ -105,11 +105,12 @@ class socketserver {
 	*/
 	protected function socketCreate($master_id) {
 		if(!isset($this->masters[$master_id])) {
+			throw new Exception("Socket Master-ID not registered. Aborting!");
 			if(SOK_TRIGGER) trigger_error("Socket Master-ID not registered. Aborting!",E_USER_WARNING);
 			return false;
 		}
 		if(!is_null($this->masters[$master_id]['socket'])) {
-			if(SOK_TRIGGER) trigger_error("Socket is already created. socketDestroy() first!",E_USER_NOTICE);
+			if(SOK_TRIGGER) trigger_error("Socket is already created. Skipping.",E_USER_NOTICE);
 			return true; //technically it's online...
 		}
 		if($this->masters[$master_id]['type'] == 'TCP') return socketCreateTCP($master_id);
