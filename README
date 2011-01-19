@@ -10,30 +10,36 @@ Abstract:
 
 Methods for remote triggering
 	1) CRONJOB
-		Easiest to setup, usually works on all given webspaces. Cronjob can be triggered by a http-request or by local php execution
-		This method of execution is NOT realtime but provides a delay of maximal the interval between 2 cronjobs
+		Easiest to setup, usually works on all given webspaces. Cronjob can be triggered by a http-request 
+		or by local php execution. This method of execution is NOT realtime but provides a delay of maximal 
+		the interval between 2 cronjobs
 		
 	2) XINETD
-		Xinetd provides an easy but powerful method of 'port knocking'; meaning that whenever an incoming connection on that port is requested,
-		the corresponding service is trigger-started. This method provides near-realtime but is easy to setup and usually requires root privileges on the box.
-		It is recommended to use iptables rules to limit the amount of incoming connections on this port as an attacker might spawn many PHP processes.
+		Xinetd provides an easy but powerful method of 'port knocking'; meaning that whenever an incoming
+		connection on that port is requested, the corresponding service is trigger-started. This method 
+		provides near-realtime but is easy to setup and usually requires root privileges on the box.
+		It is recommended to use iptables rules to limit the amount of incoming connections on this port 
+		as an attacker might spawn many PHP processes.
 		
 	3) eventListener
-		The eventListener binds to TCP/$config->eventlistener.port on $config->eventlister.ip OR UNIX/$config->eventlistener.path and whenever an incoming TCP 
-		connection is established on that port, it verifies a soft-implemented connlimit and IP-whitelist/blacklist and runs the eventHandler. 
-		The connection is closed by the server with only 2 bytes transferred: "OK".
-		If run by root, eventListener forks+suid's a child process to listen on the interface or listen on the unix socket.
-		Multiple event handlers may be run
+		The eventListener binds to TCP/$config->eventlistener.port on $config->eventlister.ip OR 
+		UNIX/$config->eventlistener.path and whenever an incoming TCP connection is established on that port,
+		it verifies a soft-implemented connlimit and IP-whitelist/blacklist and runs the eventHandler. 
+		The connection is closed by the server with only 2 bytes transferred: "OK". If run by root, 
+		eventListener forks+suid's a child process to listen on the interface or listen on the unix socket.
+		Multiple eventListener may be run as locking is only done whenever a request is pending.
 
 Methods for remote database access
 	Remote MySQL
-		Easiest to setup but requires mysql binding on a public IP address which some admin's consider a security issue. No recent exploits are known
+		Easiest to setup but requires mysql binding on a public IP address which some admin's consider a 
+		security issue. No recent exploits are known, thus remote mysql is considered safe.
 	Remote Proxy
-		Uses a script on the remote host which is requested by a POST key/password combination and lists the amount of outstanding requests for that host
-		aswell as the old request. By using corresponding POST values, the request is updated or marked as validated/failed.
+		Uses a script on the remote host which is requested by a POST key/password combination and lists the 
+		amount of outstanding requests for that host aswell as the old request. By using corresponding POST 
+		values, the request is updated or marked as validated/failed.
 		
 Security
 	suid
-		If the user the script runs under is privileged (root) and the request does not require such privileges, the system switches user to a non-provileged account
-		marked in the request or -if none provided- a fallback account specified in the config file.
-	
+		If the user the script runs under is privileged (root) and the request does not require such privileges,
+		the system switches user to a non-provileged account marked in the request or -if none provided- a 
+		fallback account specified in the config file.
