@@ -6,13 +6,7 @@
    	[0.1]
    		[2010/01/19] First usuable version (able to login to Froxlor with GET, POST and redirect)
    TODO
-	 [HTTP Support]
-		HTTP keep-alive
-		HTTP Protocol 1.1 (chunked)
-		HTTP Digest
-		Header:Refresh
-	 [Documentation]
-		Write documentation in Doxygen
+	 see ./TODO
 */ 
 
 //http://www.php.net/manual/en/function.realpath.php#85388
