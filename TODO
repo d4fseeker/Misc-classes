@@ -1,0 +1,10 @@
+[HTTP Support]
+	HTTP keep-alive
+	HTTP Protocol 1.1 (chunked)
+	HTTP Digest
+
+[Documentation]
+	Write documentation in Doxygen
+
+[Functions]
+	Modify imported resolve_href() to match coding style and practice
