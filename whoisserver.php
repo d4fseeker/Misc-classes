@@ -9,6 +9,8 @@ define("WHOISSERVER_IP6",false);
 define("WHOISSERVER_PORT",43);
 //Child process time limit or 0 to disable
 define("WHOISSERVER_TIMELIMIT",10);
+//Non-privileged user to switch to after binding port. false to disable
+define("WHOISSERVER_NONPRIVILEGED",'testme');
 //Domain Blacklist file
 define("WHOISSERVER_BLACKLIST",dirname(__FILE__)."/blacklist.ini");
 
@@ -27,6 +29,13 @@ while(!socket_bind($SOCKET, WHOISSERVER_IP, WHOISSERVER_PORT)) {
 }
 trigger_error("Successfully opened Socket ".(WHOISSERVER_IP6?"IPv6":"IPv4")."->".WHOISSERVER_IP.":".WHOISSERVER_PORT,E_USER_NOTICE);
 socket_listen($SOCKET);
+
+//Switch to non-privileged
+if(WHOISSERVER_NONPRIVILEGED) {
+	$info = posix_getpwnam(WHOISSERVER_NONPRIVILEGED) or trigger_error("Username ".WHOISSERVER_NONPRIVILEGED." does not exist!",E_USER_ERROR);
+	posix_seteuid($info['uid']);
+	trigger_error("We are now non-privileged",E_USER_NOTICE);
+}
 
 //Master process
 $PID = 1; $CLIENT = null;
