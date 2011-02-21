@@ -11,7 +11,8 @@
 
 //http://www.php.net/manual/en/function.realpath.php#85388
 function resolve_href ($base, $href) { 
-    // href="" ==> current url. 
+	if($href) $final_slash = (substr($href,-1) == '/')?true:false; //d4f
+	// href="" ==> current url. 
     if (!$href) { 
         return $base; 
     } 
@@ -50,10 +51,16 @@ function resolve_href ($base, $href) {
             $parts[] = $part; 
         } 
 
-    return ( 
+		//d4f final-slash patched
+    $url = ( 
         (array_key_exists('scheme', $base_parsed)) ? 
             $base_parsed['scheme'] . '://' . $base_parsed['host'] : "" 
     ) . "/" . implode("/", $parts); 
+	
+	if($final_slash && (substr($url,-1) != '/')) $url .= '/';
+	
+	return $url;
+	
 
 }
 
@@ -230,7 +237,8 @@ class HttpClient {
 				$cookielist = explode(",",$cookielist);
 				foreach($cookielist as $cookie) {
 					$cookie = explode(" ",$cookie); $cookie = $cookie[0]; //Ignore path, domain and time
-					list($key,$value) = explode("=",$cookie);
+					//Some cookies are broken (valueless)
+					@list($key,$value) = explode("=",$cookie);
 					$value = substr($value,0,-1);
 					$this->cookie['store'][$info['domain']][$key] = $value;
 				}
@@ -344,32 +352,32 @@ class HttpClient {
     			else $referer = $this->request['referer'];
 		}
 		else $referer = false;
-    		if($referer) $headers[] = "Referer: ".$referer;
-    		//Cookies
-	    	if($this->cookie['enable'] && isset($this->cookie['store'][$pathinfo['domain']]) && count($this->cookie['store'][$pathinfo['domain']])) {
-	    		$cookie = "Cookie: ";
-	    		foreach($this->cookie['store'][$pathinfo['domain']] as $name=>$value) {
-	    			$cookie .= $name."=".$value."; ";
-	    		}
-	    		$headers[] = $cookie;
-	    	}
-    		//HTTP Auth
-    		if(!empty($this->http_auth['username']) && !empty($this->http_auth['password'])) {
-    			$headers[] = "Authorization: BASIC ".base64_encode($this->http_auth['username'].":".$this->http_auth['password']);
-    		}
-    		//POST
-    		if($method == "POST") {
-    			$poststring = '';
-    			foreach($post as $key=>$value) {
-    				$poststring .=  rawurlencode($key)."=".rawurlencode($value)."&";
-    			}
-    			$poststring = substr($poststring,0,-1); //remove ending '&'
-    			$headers[] = "Content-Type: application/x-www-form-urlencoded";
-    			$headers[] = "Content-Length: ".strlen($poststring);
-    		}
-    		else $poststring = '';
-    		//Final touch
-    		return implode("\r\n", $headers)."\r\n\r\n".$poststring;
-    	}
+		if($referer) $headers[] = "Referer: ".$referer;
+		//Cookies
+		if($this->cookie['enable'] && isset($this->cookie['store'][$pathinfo['domain']]) && count($this->cookie['store'][$pathinfo['domain']])) {
+			$cookie = "Cookie: ";
+			foreach($this->cookie['store'][$pathinfo['domain']] as $name=>$value) {
+				$cookie .= $name."=".$value."; ";
+			}
+			$headers[] = $cookie;
+		}
+		//HTTP Auth
+		if(!empty($this->http_auth['username']) && !empty($this->http_auth['password'])) {
+			$headers[] = "Authorization: BASIC ".base64_encode($this->http_auth['username'].":".$this->http_auth['password']);
+		}
+		//POST
+		if($method == "POST") {
+			$poststring = '';
+			foreach($post as $key=>$value) {
+				$poststring .=  rawurlencode($key)."=".rawurlencode($value)."&";
+			}
+			$poststring = substr($poststring,0,-1); //remove ending '&'
+			$headers[] = "Content-Type: application/x-www-form-urlencoded";
+			$headers[] = "Content-Length: ".strlen($poststring);
+		}
+		else $poststring = '';
+		//Final touch
+		return implode("\r\n", $headers)."\r\n\r\n".$poststring;
+    }
 }
 ?>
