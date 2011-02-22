@@ -345,7 +345,11 @@ class HttpClient {
     		if($this->connection['encoding_accept'] && $this->connection['encoding_supported']['gzip']) $headers[] = "Accept-encoding: gzip";
     		//Accept language [optional]
     		if($this->request['accept_language']) $headers[] = "Accept-language: ".$this->request['accept_language'];
-    		//Referer
+    		//User-specified headers [optional]
+			foreach($this->request['headers_custom'] as $key=>$value) {
+				$headers[] = $key.": ".urlencode($value);
+			}
+			//Referer
     		if($this->request['referer'] !== false) {
     			if($this->request['referer'] == null) {
     				if(!empty($this->response['final_path'])) $referer = $this->response['final_path'];
