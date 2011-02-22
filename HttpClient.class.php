@@ -270,7 +270,7 @@ class HttpClient {
          	return true;
 	}
 	
-	protected function urlToParts($url) {
+	function urlToParts($url) {
 		//Rudimentary caching support
 		static $cached_url = array('url'=>null,'info'=>null);
 		if($url == $cached_url['url']) return $cached_url['info'];
@@ -311,6 +311,8 @@ class HttpClient {
     			else $path = '/';
     		}
     		else $path = $url;
+			//Correct relative path's
+			$path = resolve_href($this->response['final_path'],$path);
     		//Extract GET parameter
     		if(strpos($path,'?') !== false) {
     			$info['query'] = substr($path,strpos($path,'?')+1);
@@ -318,8 +320,8 @@ class HttpClient {
     			$path = substr($path,0,strpos($path,'?'));
     		}
     		else $info['query'] = false;
-    		//Correct relative path's
-    		$info['path'] = resolve_href($this->response['final_path'],$path);
+			//Add path to list
+			$info['path'] = $path;
     		//And done
     		$cached_url['url'] = $url;
     		$cached_url['info'] = $info;
